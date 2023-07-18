@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
-import { DateRangePicker } from 'react-date-range';
-import format from 'date-fns/format';
-import { startOfDay, endOfDay } from 'date-fns';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
+import { useEffect, useRef, useState } from "react";
+import { DateRangePicker } from "react-date-range";
+import format from "date-fns/format";
+import { startOfDay, endOfDay } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
-const DropdownDatePicker = () => {
+const DropdownDatePicker = ({ selectedExpiryDate, onExpiryDateChange }) => {
   const today = new Date();
 
   const [range, setRange] = useState([
     {
       startDate: startOfDay(today),
       endDate: endOfDay(today),
-      key: 'selection',
+      key: "selection",
     },
   ]);
 
@@ -21,12 +21,12 @@ const DropdownDatePicker = () => {
   const refOne = useRef(null);
 
   useEffect(() => {
-    document.addEventListener('keydown', hideOnEscape, true);
-    document.addEventListener('click', hideOnClickOutside, true);
+    document.addEventListener("keydown", hideOnEscape, true);
+    document.addEventListener("click", hideOnClickOutside, true);
   }, []);
 
   const hideOnEscape = (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       setOpen(false);
     }
   };
@@ -40,6 +40,8 @@ const DropdownDatePicker = () => {
   const applyDateRange = () => {
     setRange(tempRange);
     setOpen(false);
+    const formattedDate = format(tempRange[0].startDate, "yyyy-MM-dd");
+    onExpiryDateChange(formattedDate);
   };
 
   const cancelDateRange = () => {
@@ -50,8 +52,8 @@ const DropdownDatePicker = () => {
   return (
     <div className="calendarWrap">
       <input
-        style={{ height: '31px', textAlign: 'center' }}
-        value={`${format(range[0].startDate, 'dd MMMM yyyy')} `}
+        style={{ height: "31px", textAlign: "center" }}
+        value={`${format(range[0].startDate, "dd MMMM yyyy")} `}
         readOnly
         className="inputBox"
         onClick={() => setOpen((open) => !open)}
