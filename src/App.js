@@ -137,8 +137,7 @@ function App({ onLogout }) {
         inwardQty: "",
         selectedExpiryDate: null,
       },
-    ]);
-    
+    ]);  
   };
 
   const handleAdditionalBoxChange = (index, field, value) => {
@@ -307,9 +306,6 @@ function App({ onLogout }) {
     </div>
   </div>
 ))}
-
-
-
       <div style={{ marginTop: "10px" }}>
         <button onClick={handleAddBox}>+</button>
         <button style={{ marginLeft: "330px" }}>cancel</button>
