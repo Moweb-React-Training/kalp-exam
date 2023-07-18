@@ -123,11 +123,10 @@ function App({ onLogout }) {
       inwardQty: "",
       selectedExpiryDate: null,
     };
-  
+
     setAdditionalBoxes((prevBoxes) => [...prevBoxes, newBox]);
   };
-  
-  
+
   const handleRemoveBox = (index) => {
     setAdditionalBoxes((prevBoxes) => [
       ...prevBoxes,
@@ -137,7 +136,7 @@ function App({ onLogout }) {
         inwardQty: "",
         selectedExpiryDate: null,
       },
-    ]);  
+    ]);
   };
 
   const handleAdditionalBoxChange = (index, field, value) => {
@@ -255,57 +254,73 @@ function App({ onLogout }) {
         </div>
       </div>
       {additionalBoxes.map((box, index) => (
-  <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
-    <div style={{ marginRight: "20px" }}>
-      <div style={{ width: "200px" }}>
-        <AsyncPaginate
-          value={box.selectedWarehouse}
-          onChange={(selectedOption) =>
-            handleAdditionalBoxChange(index, "selectedWarehouse", selectedOption)
-          }
-          loadOptions={loadWarehouseOptions}
-          className="dropdown-select"
-        />
-      </div>
-    </div>
-    <div>
-      <input
-        type="text"
-        style={{ height: "33px" }}
-        value={Number(box.textBoxValue) ? `#${box.textBoxValue}` : box.textBoxValue}
-        onChange={(event) =>
-          handleAdditionalBoxChange(index, "textBoxValue", event.target.value)
-        }
-        placeholder="Type here.."
-      />
-      {Number(box.textBoxValue) ? (
-        <span style={{ display: "none" }}>{box.textBoxValue}</span>
-      ) : null}
-    </div>
-    <div style={{ marginLeft: "20px" }}>
-      <DropdownDatePicker
-        selectedExpiryDate={box.selectedExpiryDate}
-        onExpiryDateChange={(date) =>
-          handleAdditionalBoxChange(index, "selectedExpiryDate", date)
-        }
-      />
-    </div>
-    <div style={{ marginLeft: "20px" }}>
-      <input
-        type="number"
-        style={{ height: "33px" }}
-        value={box.inwardQty}
-        onChange={(event) =>
-          handleAdditionalBoxChange(index, "inwardQty", event.target.value)
-        }
-        placeholder="Type here..."
-      />
-    </div>
-    <div style={{ marginLeft: "20px" }}>
-      <button onClick={() => handleRemoveBox(index)}>x</button>
-    </div>
-  </div>
-))}
+        <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
+          <div style={{ marginRight: "20px" }}>
+            <div style={{ width: "200px" }}>
+              <AsyncPaginate
+                value={box.selectedWarehouse}
+                onChange={(selectedOption) =>
+                  handleAdditionalBoxChange(
+                    index,
+                    "selectedWarehouse",
+                    selectedOption
+                  )
+                }
+                loadOptions={loadWarehouseOptions}
+                className="dropdown-select"
+              />
+            </div>
+          </div>
+          <div>
+            <input
+              type="text"
+              style={{ height: "33px" }}
+              value={
+                Number(box.textBoxValue)
+                  ? `#${box.textBoxValue}`
+                  : box.textBoxValue
+              }
+              onChange={(event) =>
+                handleAdditionalBoxChange(
+                  index,
+                  "textBoxValue",
+                  event.target.value
+                )
+              }
+              placeholder="Type here.."
+            />
+            {Number(box.textBoxValue) ? (
+              <span style={{ display: "none" }}>{box.textBoxValue}</span>
+            ) : null}
+          </div>
+          <div style={{ marginLeft: "20px" }}>
+            <DropdownDatePicker
+              selectedExpiryDate={box.selectedExpiryDate}
+              onExpiryDateChange={(date) =>
+                handleAdditionalBoxChange(index, "selectedExpiryDate", date)
+              }
+            />
+          </div>
+          <div style={{ marginLeft: "20px" }}>
+            <input
+              type="number"
+              style={{ height: "33px" }}
+              value={box.inwardQty}
+              onChange={(event) =>
+                handleAdditionalBoxChange(
+                  index,
+                  "inwardQty",
+                  event.target.value
+                )
+              }
+              placeholder="Type here..."
+            />
+          </div>
+          <div style={{ marginLeft: "20px" }}>
+            <button onClick={() => handleRemoveBox(index)}>x</button>
+          </div>
+        </div>
+      ))}
       <div style={{ marginTop: "10px" }}>
         <button onClick={handleAddBox}>+</button>
         <button style={{ marginLeft: "330px" }}>cancel</button>
