@@ -425,7 +425,14 @@ function App({ onLogout }) {
         <button style={{ marginLeft: "330px" }} onClick={handleClear}>
           clear
         </button>
-        <button style={{ marginLeft: "20px" }} onClick={handleSubmit}>
+        <button
+          style={{
+            marginLeft: "20px",
+            backgroundColor: "blueviolet",
+            color: "white",
+          }}
+          onClick={handleSubmit}
+        >
           Submit
         </button>
       </div>
