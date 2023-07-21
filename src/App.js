@@ -14,8 +14,54 @@ function App({ onLogout }) {
   const [textBoxValue, setTextBoxValue] = useState("");
   const [inwardQty, setInwardQty] = useState("");
   const [additionalBoxes, setAdditionalBoxes] = useState([]);
-  const [selectedExpiryDate, setSelectedExpiryDate] = useState();
+  const [selectedExpiryDate, setSelectedExpiryDate] = useState(new Date());
   const [submittedData, setSubmittedData] = useState([]);
+  const [additionalBoxCount, setAdditionalBoxCount] = useState(0);
+  const [skuDropdownError, setSkuDropdownError] = useState("");
+
+  const handleAdditionalBoxChange = (index, field, value) => {
+    setAdditionalBoxes((prevBoxes) => {
+      const updatedBoxes = [...prevBoxes];
+      updatedBoxes[index] = {
+        ...updatedBoxes[index],
+        [field]: value,
+      };
+      return updatedBoxes;
+    });
+  };
+
+  const handleClear = () => {
+    setSelectedWarehouse({ value: "", label: "select" });
+    setTextBoxValue("");
+    setInwardQty("");
+    setAdditionalBoxes([]);
+    setSelectedExpiryDate(null);
+    setSubmittedData([]);
+    setAdditionalBoxCount(0);
+    setSkuDropdownError("");
+  };
+
+  const handleAddBox = () => {
+    setAdditionalBoxes((prevBoxes) => [
+      ...prevBoxes,
+      {
+        selectedWarehouse: { value: "", label: "select" },
+        textBoxValue: "",
+        selectedExpiryDate: null,
+        inwardQty: "",
+      },
+    ]);
+    setAdditionalBoxCount((prevCount) => prevCount + 1);
+  };
+
+  const handleRemoveBox = (index) => {
+    setAdditionalBoxes((prevBoxes) => {
+      const updatedBoxes = [...prevBoxes];
+      updatedBoxes.splice(index, 1);
+      return updatedBoxes;
+    });
+    setAdditionalBoxCount((prevCount) => prevCount - 1);
+  };
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -101,14 +147,18 @@ function App({ onLogout }) {
   };
 
   const handleWarehouseDropdownChange = async (selectedOption) => {
+    // Reset the error message when a new option is selected
+    setSkuDropdownError("");
     setSelectedWarehouse(selectedOption);
     setOffset(0);
     setData(null);
   };
 
   const handleTextBoxChange = (event) => {
-    const value = event.target.value;
-    setTextBoxValue(value);
+    const input = event.target.value;
+    setTextBoxValue(
+      input === "" ? "" : input.startsWith("#") ? input : `#${input}`
+    );
   };
 
   const handleInwardQtyChange = (event) => {
@@ -116,43 +166,23 @@ function App({ onLogout }) {
     setInwardQty(value);
   };
 
-  const handleAddBox = () => {
-    const newBox = {
-      selectedWarehouse: { value: "", label: "select" },
-      textBoxValue: "",
-      inwardQty: "",
-      selectedExpiryDate: null,
-    };
-
-    setAdditionalBoxes((prevBoxes) => [...prevBoxes, newBox]);
-  };
-
-  const handleRemoveBox = (index) => {
-    setAdditionalBoxes((prevBoxes) => [
-      ...prevBoxes,
-      {
-        selectedWarehouse: { value: "", label: "select" },
-        textBoxValue: "",
-        inwardQty: "",
-        selectedExpiryDate: null,
-      },
-    ]);
-  };
-
-  const handleAdditionalBoxChange = (index, field, value) => {
-    setAdditionalBoxes((prevBoxes) => {
-      const updatedBoxes = [...prevBoxes];
-      updatedBoxes[index][field] = value;
-      return updatedBoxes;
-    });
-  };
-
   const handleExpiryDateChange = (date) => {
     setSelectedExpiryDate(date);
   };
 
   // submit API
+
   const handleSubmit = async () => {
+    // Check if a valid SKU is selected
+    if (!selectedWarehouse.value) {
+      alert("Please select a valid Product SKU.");
+      return;
+    }
+    if (!selectedWarehouse.value) {
+      alert("Please select a valid Product SKU.");
+      return;
+    }
+
     if (!textBoxValue || !inwardQty) {
       alert("Please enter values for Batch Number and Inward Quantity.");
       return;
@@ -171,6 +201,12 @@ function App({ onLogout }) {
             expiry_date: selectedExpiryDate,
             qty: inwardQty,
           },
+          ...additionalBoxes.map((box) => ({
+            product_id: box.selectedWarehouse.value,
+            batch_number: box.textBoxValue,
+            expiry_date: box.selectedExpiryDate,
+            qty: box.inwardQty,
+          })),
         ],
         stock_type: "FreshProduct",
         stock_entry_type: "In",
@@ -183,14 +219,22 @@ function App({ onLogout }) {
         { headers }
       );
 
-      const submittedItem = {
-        product_id: selectedWarehouse.value,
-        batch_number: textBoxValue,
-        expiry_date: selectedExpiryDate,
-        qty: inwardQty,
-      };
+      const submittedItems = [
+        {
+          product_id: selectedWarehouse.value,
+          batch_number: textBoxValue,
+          expiry_date: selectedExpiryDate,
+          qty: inwardQty,
+        },
+        ...additionalBoxes.map((box) => ({
+          product_id: box.selectedWarehouse.value,
+          batch_number: box.textBoxValue,
+          expiry_date: box.selectedExpiryDate,
+          qty: box.inwardQty,
+        })),
+      ];
 
-      setSubmittedData((prevData) => [...prevData, submittedItem]);
+      setSubmittedData(submittedItems); // Set the new entries as the submitted data
     } catch (error) {
       console.log("Error:", error);
     }
@@ -223,6 +267,11 @@ function App({ onLogout }) {
               loadOptions={loadWarehouseOptions}
               className="dropdown-select"
             />
+            {skuDropdownError && (
+              <p style={{ color: "red", marginTop: "5px" }}>
+                {skuDropdownError}
+              </p>
+            )}
           </div>
         </div>
         <div>
@@ -230,7 +279,7 @@ function App({ onLogout }) {
           <input
             type="text"
             style={{ height: "33px" }}
-            value={Number(textBoxValue) ? `#${textBoxValue}` : textBoxValue}
+            value={textBoxValue}
             onChange={handleTextBoxChange}
             placeholder="Type here.."
           />
@@ -252,78 +301,77 @@ function App({ onLogout }) {
             placeholder="Type here..."
           />
         </div>
+        
       </div>
-      {additionalBoxes.map((box, index) => (
-        <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
-          <div style={{ marginRight: "20px" }}>
-            <div style={{ width: "200px" }}>
-              <AsyncPaginate
-                value={box.selectedWarehouse}
-                onChange={(selectedOption) =>
+      {additionalBoxes.length > 0 &&
+        additionalBoxes.map((box, index) => (
+          <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
+            <div style={{ marginRight: "20px" }}>
+              <div style={{ width: "200px" }}>
+                <AsyncPaginate
+                  value={box.selectedWarehouse}
+                  onChange={(selectedOption) =>
+                    handleAdditionalBoxChange(
+                      index,
+                      "selectedWarehouse",
+                      selectedOption
+                    )
+                  }
+                  loadOptions={loadWarehouseOptions}
+                  className="dropdown-select"
+                />
+              </div>
+            </div>
+            <div>
+              <input
+                type="text"
+                style={{ height: "33px" }}
+                value={box.textBoxValue}
+                onChange={(event) =>
                   handleAdditionalBoxChange(
                     index,
-                    "selectedWarehouse",
-                    selectedOption
+                    "textBoxValue",
+                    event.target.value
                   )
                 }
-                loadOptions={loadWarehouseOptions}
-                className="dropdown-select"
+                placeholder="Type here.."
+              />
+              {Number(box.textBoxValue) ? (
+                <span style={{ display: "none" }}>{box.textBoxValue}</span>
+              ) : null}
+            </div>
+            <div style={{ marginLeft: "20px" }}>
+              <DropdownDatePicker
+                selectedExpiryDate={box.selectedExpiryDate}
+                onExpiryDateChange={(date) =>
+                  handleAdditionalBoxChange(index, "selectedExpiryDate", date)
+                }
               />
             </div>
+            <div style={{ marginLeft: "20px" }}>
+              <input
+                type="number"
+                style={{ height: "33px" }}
+                value={box.inwardQty}
+                onChange={(event) =>
+                  handleAdditionalBoxChange(
+                    index,
+                    "inwardQty",
+                    event.target.value
+                  )
+                }
+                placeholder="Type here..."
+              />
+            </div>
+            <button onClick={() => handleRemoveBox(index)}>Remove</button>
           </div>
-          <div>
-            <input
-              type="text"
-              style={{ height: "33px" }}
-              value={
-                Number(box.textBoxValue)
-                  ? `#${box.textBoxValue}`
-                  : box.textBoxValue
-              }
-              onChange={(event) =>
-                handleAdditionalBoxChange(
-                  index,
-                  "textBoxValue",
-                  event.target.value
-                )
-              }
-              placeholder="Type here.."
-            />
-            {Number(box.textBoxValue) ? (
-              <span style={{ display: "none" }}>{box.textBoxValue}</span>
-            ) : null}
-          </div>
-          <div style={{ marginLeft: "20px" }}>
-            <DropdownDatePicker
-              selectedExpiryDate={box.selectedExpiryDate}
-              onExpiryDateChange={(date) =>
-                handleAdditionalBoxChange(index, "selectedExpiryDate", date)
-              }
-            />
-          </div>
-          <div style={{ marginLeft: "20px" }}>
-            <input
-              type="number"
-              style={{ height: "33px" }}
-              value={box.inwardQty}
-              onChange={(event) =>
-                handleAdditionalBoxChange(
-                  index,
-                  "inwardQty",
-                  event.target.value
-                )
-              }
-              placeholder="Type here..."
-            />
-          </div>
-          <div style={{ marginLeft: "20px" }}>
-            <button onClick={() => handleRemoveBox(index)}>x</button>
-          </div>
-        </div>
-      ))}
+        ))}
+
       <div style={{ marginTop: "10px" }}>
         <button onClick={handleAddBox}>+</button>
-        <button style={{ marginLeft: "330px" }}>cancel</button>
+        <button style={{ marginLeft: "330px" }} onClick={handleClear}>
+          clear
+        </button>
         <button style={{ marginLeft: "20px" }} onClick={handleSubmit}>
           Submit
         </button>
