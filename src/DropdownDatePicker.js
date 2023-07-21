@@ -70,7 +70,7 @@ const DropdownDatePicker = ({ selectedExpiryDate, onExpiryDateChange }) => {
               months={1}
               direction="horizontal"
               className="calendarElement small"
-              minDate={new Date()} // Set minDate to today to restrict past dates only
+              minDate={new Date()} 
               
             />
             <div className="buttonContainer">

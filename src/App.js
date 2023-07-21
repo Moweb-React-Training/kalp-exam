@@ -57,7 +57,7 @@ function App({ onLogout }) {
       {
         selectedWarehouse: { value: "", label: "select" },
         textBoxValue: "",
-        selectedExpiryDate: formattedDate, // Set the default expiry date to "yyyy-mm-dd" format
+        selectedExpiryDate: formattedDate,
         inwardQty: "",
       },
     ]);
@@ -159,7 +159,6 @@ function App({ onLogout }) {
   };
 
   const handleWarehouseDropdownChange = async (selectedOption) => {
-    // Reset the error message when a new option is selected
     setSkuDropdownError("");
     setSelectedWarehouse(selectedOption);
     setOffset(0);
@@ -207,7 +206,6 @@ function App({ onLogout }) {
     setRowErrors([]);
 
     if (additionalErrors.some((error) => error !== null)) {
-      // If any error exists in additional rows, display the first error
       alert(additionalErrors.find((error) => error !== null));
       return;
     }
@@ -265,7 +263,7 @@ function App({ onLogout }) {
         })),
       ];
 
-      setSubmittedData(submittedItems); // Set the new entries as the submitted data
+      setSubmittedData(submittedItems);
     } catch (error) {
       console.log("Error:", error);
     }
@@ -291,9 +289,8 @@ function App({ onLogout }) {
   const handleRemoveFirstRow = () => {
     setSubmittedData((prevData) => {
       const updatedData = [...prevData];
-      updatedData.shift(); // Remove the first element (first row)
+      updatedData.shift();
 
-      // Clear the first row's data
       setSelectedWarehouse({ value: "", label: "select" });
       setTextBoxValue("");
       setInwardQty("");
