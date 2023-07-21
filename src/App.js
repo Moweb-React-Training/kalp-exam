@@ -18,6 +18,7 @@ function App({ onLogout }) {
   const [submittedData, setSubmittedData] = useState([]);
   const [additionalBoxCount, setAdditionalBoxCount] = useState(0);
   const [skuDropdownError, setSkuDropdownError] = useState("");
+  const [warehouseError, setWarehouseError] = useState("");
 
   const handleAdditionalBoxChange = (index, field, value) => {
     setAdditionalBoxes((prevBoxes) => {
@@ -41,18 +42,28 @@ function App({ onLogout }) {
     setSkuDropdownError("");
   };
 
+  // ...
+
   const handleAddBox = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
     setAdditionalBoxes((prevBoxes) => [
       ...prevBoxes,
       {
         selectedWarehouse: { value: "", label: "select" },
         textBoxValue: "",
-        selectedExpiryDate: null,
+        selectedExpiryDate: formattedDate, // Set the default expiry date to "yyyy-mm-dd" format
         inwardQty: "",
       },
     ]);
     setAdditionalBoxCount((prevCount) => prevCount + 1);
   };
+
+  // ...
 
   const handleRemoveBox = (index) => {
     setAdditionalBoxes((prevBoxes) => {
@@ -174,10 +185,7 @@ function App({ onLogout }) {
 
   const handleSubmit = async () => {
     // Check if a valid SKU is selected
-    if (!selectedWarehouse.value) {
-      alert("Please select a valid Product SKU.");
-      return;
-    }
+
     if (!selectedWarehouse.value) {
       alert("Please select a valid Product SKU.");
       return;
@@ -188,6 +196,13 @@ function App({ onLogout }) {
       return;
     }
 
+    if (!selectedExpiryDate) {
+      setSelectedExpiryDate(new Date());
+    }
+
+    const today = new Date();
+    const selectedDate = selectedExpiryDate || today;
+    const expiryDateToSubmit = selectedDate.toLocaleDateString("en-CA"); // 'en-CA' gives the "yyyy-mm-dd" format
     try {
       const headers = {
         Authorization: `Bearer ${token}`,
@@ -198,7 +213,7 @@ function App({ onLogout }) {
           {
             product_id: selectedWarehouse.value,
             batch_number: textBoxValue,
-            expiry_date: selectedExpiryDate,
+            expiry_date: expiryDateToSubmit,
             qty: inwardQty,
           },
           ...additionalBoxes.map((box) => ({
@@ -249,11 +264,28 @@ function App({ onLogout }) {
         {item.batch_number}
       </td>
       <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-        {item.expiry_date}
+        {item.expiry_date instanceof Date
+          ? item.expiry_date.toISOString().split("T")[0]
+          : item.expiry_date}
       </td>
       <td style={{ padding: "10px", border: "1px solid #ddd" }}>{item.qty}</td>
     </tr>
   ));
+
+  const handleRemoveFirstRow = () => {
+    setSubmittedData((prevData) => {
+      const updatedData = [...prevData];
+      updatedData.shift(); // Remove the first element (first row)
+
+      // Clear the first row's data
+      setSelectedWarehouse({ value: "", label: "select" });
+      setTextBoxValue("");
+      setInwardQty("");
+      setSelectedExpiryDate(new Date());
+
+      return updatedData;
+    });
+  };
 
   return (
     <div>
@@ -301,7 +333,9 @@ function App({ onLogout }) {
             placeholder="Type here..."
           />
         </div>
-        
+        <div style={{ height: "20px", marginTop: "77px" }}>
+          <button onClick={handleRemoveFirstRow}>Remove</button>
+        </div>
       </div>
       {additionalBoxes.length > 0 &&
         additionalBoxes.map((box, index) => (
@@ -327,19 +361,26 @@ function App({ onLogout }) {
                 type="text"
                 style={{ height: "33px" }}
                 value={box.textBoxValue}
-                onChange={(event) =>
-                  handleAdditionalBoxChange(
-                    index,
-                    "textBoxValue",
-                    event.target.value
-                  )
-                }
+                onChange={(event) => {
+                  const newValue = event.target.value;
+                  if (!box.textBoxValue.startsWith("#")) {
+                    // Append "#" only if it's not already there
+                    handleAdditionalBoxChange(
+                      index,
+                      "textBoxValue",
+                      "#" + newValue
+                    );
+                  } else {
+                    handleAdditionalBoxChange(index, "textBoxValue", newValue);
+                  }
+                }}
                 placeholder="Type here.."
               />
               {Number(box.textBoxValue) ? (
                 <span style={{ display: "none" }}>{box.textBoxValue}</span>
               ) : null}
             </div>
+
             <div style={{ marginLeft: "20px" }}>
               <DropdownDatePicker
                 selectedExpiryDate={box.selectedExpiryDate}
