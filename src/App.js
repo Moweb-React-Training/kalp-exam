@@ -18,7 +18,6 @@ function App({ onLogout }) {
   const [submittedData, setSubmittedData] = useState([]);
   const [additionalBoxCount, setAdditionalBoxCount] = useState(0);
   const [skuDropdownError, setSkuDropdownError] = useState("");
-  const [warehouseError, setWarehouseError] = useState("");
   const [rowErrors, setRowErrors] = useState([]);
 
   const handleAdditionalBoxChange = (index, field, value) => {
