@@ -19,6 +19,7 @@ function App({ onLogout }) {
   const [additionalBoxCount, setAdditionalBoxCount] = useState(0);
   const [skuDropdownError, setSkuDropdownError] = useState("");
   const [warehouseError, setWarehouseError] = useState("");
+  const [rowErrors, setRowErrors] = useState([]);
 
   const handleAdditionalBoxChange = (index, field, value) => {
     setAdditionalBoxes((prevBoxes) => {
@@ -191,8 +192,23 @@ function App({ onLogout }) {
       return;
     }
 
-    if (!textBoxValue || !inwardQty) {
-      alert("Please enter values for Batch Number and Inward Quantity.");
+    if (!textBoxValue || !inwardQty || !selectedExpiryDate) {
+      alert("Please fill in all fields in the first row.");
+      return;
+    }
+
+    const additionalErrors = additionalBoxes.map((box) => {
+      if (!box.selectedWarehouse.value || !box.textBoxValue || !box.inwardQty) {
+        return "Please fill in all fields in additional rows.";
+      }
+      return null;
+    });
+
+    setRowErrors([]);
+
+    if (additionalErrors.some((error) => error !== null)) {
+      // If any error exists in additional rows, display the first error
+      alert(additionalErrors.find((error) => error !== null));
       return;
     }
 
