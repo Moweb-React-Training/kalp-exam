@@ -421,7 +421,7 @@ function App({ onLogout }) {
         ))}
 
       <div style={{ marginTop: "10px" }}>
-        <button onClick={handleAddBox}>+</button>
+        <button onClick={handleAddBox}>ADD</button>
         <button style={{ marginLeft: "330px" }} onClick={handleClear}>
           clear
         </button>
